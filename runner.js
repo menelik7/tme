@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const chalk = require("chalk");
+const render = require("./render");
 
 const forbiddenDirs = ["node_modules"];
 
@@ -14,13 +15,14 @@ class Runner {
       // global is a node keyword that makes values available in a global scope.
       console.log(chalk.gray(`----${file.shortName}`));
       const beforeEach = [];
+      global.render = render;
       global.beforeEach = (fn) => {
         beforeEach.push(fn);
       };
-      global.it = (desc, fn) => {
+      global.it = async (desc, fn) => {
         beforeEach.forEach((func) => func());
         try {
-          fn();
+          await fn();
           console.log(chalk.green(`\tOK - ${desc}`));
         } catch (err) {
           const message = err.message.replace(/\n/g, "\n\t\t");
